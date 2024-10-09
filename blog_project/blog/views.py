@@ -5,14 +5,24 @@ from .forms import PostForm, CommentForm
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.views.generic import CreateView
+from django.db.models import Q 
 
 # Create your views here.
 @csrf_exempt 
 def post_list(request):
     posts = Post.objects.all().order_by("-created_at")
-    return render(request, 'post/list.html', {'posts': posts})
+    paginator = Paginator(posts, 2)
+    page = request.GET.get('page')
+    try:
+        objects = paginator.page(page)
+    except PageNotAnInteger:
+        objects = paginator.page(1)
+    except EmptyPage:
+        objects = paginator.page(paginator.num_pages)
+    return render(request, 'post/list.html', {'page': page,
+                                              'posts': objects})
 
 @csrf_exempt
 def post_detail(request, id):
@@ -20,7 +30,9 @@ def post_detail(request, id):
         post = Post.objects.get(id=id)
     except Post.DoesNotExist:
         raise HttpResponseNotFound('No post found')
-    return render(request, 'post/detail.html', {'post': post})
+    return render(request, 'post/detail.html', {
+                                                'post': post,
+                                                'user': request.user})
 
 
 # class CreatePostView(LoginRequiredMixin, CreateView):
@@ -46,6 +58,8 @@ def post_create(request):
         form = PostForm()
     return render(request, "post/form.html", {"form": form})
 
+
+# TODO: edit and delete buttom for the author not for all
 @login_required
 def post_edit(request, id):
     post = get_object_or_404(Post, id=id, author=request.user)
@@ -56,7 +70,7 @@ def post_edit(request, id):
             return redirect(f'/posts/{post.id}')
     else:
         form = PostForm(instance=post)
-    return render(request, 'post/edit_post.html', {'form': form})
+    return render(request, 'post/edit_post.html', {'form': form,})
 
 @login_required
 def post_delete(request, id):
@@ -83,5 +97,17 @@ class AddCommentOnPostView(CreateView):
         return super().form_valid(form)
 
 
+# class SearchResultsView(ListView):
+#     model = Post
+#     template_name = 'post/search.html'
+
+#     def get_queryset(self): # new
+#         query = self.request.GET.get("q")
+#         result =  Post.objects.filter(
+#             Q(title__icontains=query) | Q(author__name__icontains=query) | Q(content__icontains=query)
+#         )()
+#         if result is None:
+#             return HttpResponse("No such results...")
+#         return result
 
 

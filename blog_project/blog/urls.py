@@ -4,6 +4,7 @@ from .views import post_create, post_list, post_detail, post_edit, post_delete, 
 
 urlpatterns = [
     path('', post_list, name='post_list'),
+    # path('search/', SearchResultsView.as_view(), name='search'), doesn't work as expected
     path('posts/<int:id>/', post_detail, name='post_detail'),
     path('posts/new/', post_create, name='post_create'),
     path('posts/<int:id>/edit/', post_edit, name='post_edit'),

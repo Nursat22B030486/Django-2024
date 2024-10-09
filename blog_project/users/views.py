@@ -68,7 +68,7 @@ def profile_view(request, id):
     following_count = user.user_following.count()  # Users this user is following
 
     context = {
-        'user': user,
+        'user': request.user,
         'profile': profile,
         'is_following': is_following,
         'followers': followers_count,
@@ -80,7 +80,7 @@ def profile_view(request, id):
 def edit_profile(request):
     user = request.user
     profile = request.user.profile
-
+    # TODO: edit_profile button should not be shown on others profilex
     if request.method == "POST":
         user_form = ChangeUserForm(request.POST, instance=user)
         profile_form = ChangeProfileForm(request.POST, request.FILES, instance=profile)
@@ -108,8 +108,8 @@ def logout_user(request):
 def follow_user(request, id):
     user_to_follow = get_object_or_404(User, id = id)
     if request.user != user_to_follow:
-        Follow.objects.get_or_create(user_follower=request.user, user_following=user_to_follow)
-    return redirect('users:profile/', id=id)
+        Follow.objects.get_or_create(follower=request.user, following=user_to_follow)
+    return redirect('users:profile', id=id)
 
 @login_required
 def unfollow_user(request, id):

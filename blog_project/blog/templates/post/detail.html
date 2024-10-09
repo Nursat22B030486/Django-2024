@@ -4,24 +4,26 @@
 
 {% block body %}
 <h5><a href="/">Back</a></h5>
-<h1>{{ post.title }}  </h1>
+<h1>{{ post.title }} </h1>
 <p>{{post.content}}</p>
 <p class="date">
-    Published {{ post.created_at }} by {{ post.author }}
+    Published {{ post.created_at }} by <a href="{% url 'users:profile' post.author.id%}">{{ post.author }}</a>
 </p>
-
-<a href="/posts/{{post.id}}/edit/">Edit</a> <a href="/posts/{{post.id}}/delete/">Delete</a>
-
+{% if post.author == user %}
+    <a href="/posts/{{post.id}}/edit/">Edit</a> <a href="/posts/{{post.id}}/delete/">Delete</a>
+{% endif %}
 <H3>Comments...</H3>
-<br/>
+<br />
 
 {% if not post.post_comments.all %}
-    No comments yet... 
+No comments yet...
 {% else %}
-    {% for comment in post.post_comments.all %}
-        {{ comment.author }} - {{comment.content}}
-        <br/>
-    {% endfor %}
+{% for comment in post.post_comments.all %}
+<h3> <a href="{% url 'users:profile' comment.author.id%}">{{ comment.author }}</a> [{{comment.created_at}}] </h3>
+<p>{{comment.content}}</p>
+{% endfor %}
 {% endif %}
+<br />
+<br />
 <a href="{% url 'add_comment' post.id %}">Add comment</a>
 {% endblock %}
