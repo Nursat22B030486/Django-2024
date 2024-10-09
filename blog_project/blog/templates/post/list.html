@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Blog Application{% endblock %}
+
+{% block body %}
+<h1>Posts:</h1>
+<ul>
+    {% for post in posts %}
+        <li><a href="posts/{{post.id}}/"> {{post.title}} </a>
+        {{ post.content|truncatewords:30|linebreaks }}  
+
+        </li>
+    {% endfor %}    
+</ul>
+{% endblock %}
